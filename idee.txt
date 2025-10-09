@@ -1,12 +1,8 @@
-//idea calcolo PREZZOUNITARIO (forse lo faremo in JS)
+//idea calcolo PREZZOUNITARIO (forse lo faremo in JS):
 
 DECLARE @SCONTOAPPLICATO INT = CONVERT(INT, LEFT(SCONTO, LEN(SCONTO) - 1))
-
 DECLARE @PREZZOBASE DECIMAL(25,2) = (VENDITA JOIN PRODOTTO ON VENDITA.IDPRODOTTO==PRODOTTO.ID).PREZZO 
-
 SET PREZZOUNITARIO = @PREZZOBASE - ((@PREZZOBASE * @SCONTOAPPLICATO) / 100)
 
-
-
-//idea calcolo SCONTO (forse lo faremo in JS)
+//idea calcolo SCONTO (forse lo faremo in JS):
 
