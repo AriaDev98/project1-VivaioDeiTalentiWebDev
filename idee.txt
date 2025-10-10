@@ -6,3 +6,5 @@ SET PREZZOUNITARIO = @PREZZOBASE - ((@PREZZOBASE * @SCONTOAPPLICATO) / 100)
 
 //idea calcolo SCONTO (forse lo faremo in JS): ?
 
+//test
+
