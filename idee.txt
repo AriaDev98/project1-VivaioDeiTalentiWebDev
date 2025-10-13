@@ -1,3 +1,0 @@
-//idea calcolo PREZZOSCONTATO (forse lo faremo in JS):
-
-//idea calcolo SCONTO (forse lo faremo in JS): ?
