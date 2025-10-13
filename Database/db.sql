@@ -1,6 +1,6 @@
+DROP TABLE IF EXISTS PRODOTTOVENDUTO;
 DROP TABLE IF EXISTS ORDINE;
 DROP TABLE IF EXISTS SCONTRINO;
-DROP TABLE IF EXISTS VENDITA;
 DROP TABLE IF EXISTS PUNTOVENDITA;
 DROP TABLE IF EXISTS CLIENTE;
 DROP TABLE IF EXISTS PRODOTTO;
@@ -8,31 +8,25 @@ DROP TABLE IF EXISTS CATEGORIA;
 DROP TABLE IF EXISTS PROVINCIA;
 
 --TABELLE:
-
---usare IDENTITY per gli ID?
-
 CREATE TABLE PROVINCIA ( 
-    IDPROVINCIA INT PRIMARY KEY, --motivo: se db esteso all'estero NOME non può fare da chiave primaria (es: Parma USA e Parma IT)
-        CHECK (IDPROVINCIA > 0),
+    IDPROVINCIA INT IDENTITY(1,1) PRIMARY KEY, --motivo: se db esteso all'estero NOME non può fare da chiave primaria (es: Parma USA e Parma IT)
 
-    NOME NVARCHAR(50) NOT NULL, --devono esserci almeno Milano, Lodi, Padova, Venezia, Genova, Bologna, Roma e Napoli (provincie dei punti vendita)
-    REGIONE NVARCHAR(50) NOT NULL
+    NOMEPROVINCIA VARCHAR(50) NOT NULL, --devono esserci almeno Milano, Lodi, Padova, Venezia, Genova, Bologna, Roma e Napoli (provincie dei punti vendita)
+    REGIONE VARCHAR(50) NOT NULL
 );
 --tutte le provincie di italia
 
-CREATE TABLE CATEGORIA (
-    IDCATEGORIA INT PRIMARY KEY,
-        CHECK (IDCATEGORIA > 0),
+CREATE TABLE CATEGORIA ( 
+    IDCATEGORIA INT IDENTITY(100,1) PRIMARY KEY, --max 100 categorie
 
-    NOME NVARCHAR(50) NOT NULL,
-    CATEGORIAMERCEOLOGICA NVARCHAR(50) NOT NULL
+    NOMECATEGORIA VARCHAR(50) NOT NULL,
+    CATEGORIAMERCEOLOGICA VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE PRODOTTO (
-    IDPRODOTTO INT PRIMARY KEY,
-        CHECK (IDPRODOTTO > 0),
+    IDPRODOTTO INT IDENTITY(200,1) PRIMARY KEY, --max 100 prodotti
 
-    NOME NVARCHAR(50) NOT NULL,
+    NOMEPRODOTTO VARCHAR(50) NOT NULL,
     
     PREZZOBASE DECIMAL(10,2) NOT NULL,
         CHECK (PREZZOBASE > 0),
@@ -43,8 +37,7 @@ CREATE TABLE PRODOTTO (
 );
 
 CREATE TABLE CLIENTE (
-    IDCLIENTE INT PRIMARY KEY,
-        CHECK (IDCLIENTE > 0),
+    IDCLIENTE INT IDENTITY(300,1) PRIMARY KEY, ----max 100 clienti
 
     IDPROVINCIA INT NOT NULL,
 
@@ -53,22 +46,21 @@ CREATE TABLE CLIENTE (
     FOREIGN KEY (IDPROVINCIA) REFERENCES PROVINCIA(IDPROVINCIA)
 );
 
-CREATE TABLE PUNTOVENDITA ( --deve esserci almeno 1 punto di vendita per provincia
-    IDPUNTOVENDITA INT PRIMARY KEY,
-        CHECK (IDPUNTOVENDITA > 0),
+CREATE TABLE PUNTOVENDITA ( --deve esserci almeno 1 punto di vendita per le provincie di Milano, Lodi, Padova, Venezia, Genova, Bologna, Roma e Napoli 
+    IDPUNTOVENDITA INT IDENTITY(400,1) PRIMARY KEY, --max 100 punti vendita
 
     IDPROVINCIA INT NOT NULL, 
         --TODO: deve essere realtivo a una provincia tra Milano, Lodi, Padova, Venezia, Genova, Bologna, Roma e Napoli (provincie dei punti vendita)
 
-    INDIRIZZO NVARCHAR(50) NOT NULL, --controllo formattazione con un CHECK?
+    INDIRIZZO VARCHAR(50) NOT NULL, 
+        CHECK ((INDIRIZZO LIKE 'via %, %') OR (INDIRIZZO LIKE 'strada %, %')),
 
     FOREIGN KEY (IDPROVINCIA) REFERENCES PROVINCIA(IDPROVINCIA)
 );
 
 
-CREATE TABLE SCONTRINO ( --minimo 150 tuple
-    IDSCONTRINO INT PRIMARY KEY,
-        CHECK (IDSCONTRINO > 0),
+CREATE TABLE SCONTRINO ( --minimo 75 tuple (massimo 100)
+    IDSCONTRINO INT IDENTITY(500,1) PRIMARY KEY,
 
     IDPUNTOVENDITA INT NOT NULL,
 
@@ -77,20 +69,20 @@ CREATE TABLE SCONTRINO ( --minimo 150 tuple
     FOREIGN KEY (IDPUNTOVENDITA) REFERENCES PUNTOVENDITA(IDPUNTOVENDITA)
 );
 
-CREATE TABLE ORDINE ( --minimo 150 tuple
-    IDORDINE INT PRIMARY KEY,
-        CHECK (IDORDINE > 0),
+CREATE TABLE ORDINE ( --minimo 75 tuple (massimo 100)
+    IDORDINE INT IDENTITY(600,1) PRIMARY KEY,
 
     IDCLIENTE INT NOT NULL,
 
     FOREIGN KEY (IDCLIENTE) REFERENCES CLIENTE(IDCLIENTE)
 );
 
-CREATE TABLE VENDITAPRODOTTO ( --ciascuna tupla relativa alla vendita di un SINGOLO prodotto, conteremo il numero di prodotti venduti in una vendita con COUNT
-    IDVENDITAPRODOTTO INT PRIMARY KEY,
-        CHECK (IDVENDITAPRODOTTO > 0),
+--numero di tuple di scontrino + numero di tuple di ordine <= 150
+
+CREATE TABLE PRODOTTOVENDUTO ( --ciascuna tupla relativa alla vendita di un SINGOLO prodotto, conteremo il numero di prodotti venduti in una vendita con COUNT
+    IDPRODOTTOVENDUTO INT IDENTITY(700,1) PRIMARY KEY,
     
-    TIPO NVARCHAR(50) NOT NULL, 
+    TIPO VARCHAR(50) NOT NULL, 
         CHECK (TIPO IN ('retail', 'online')),
 
     IDSCONTRINO INT, 
@@ -123,7 +115,7 @@ CREATE TABLE VENDITAPRODOTTO ( --ciascuna tupla relativa alla vendita di un SING
 
 
 --INSERTS:
-
+-- mettere gli insert
 
 
 
@@ -134,6 +126,6 @@ SELECT * FROM CATEGORIA;
 SELECT * FROM PRODOTTO;
 SELECT * FROM CLIENTE;
 SELECT * FROM PUNTOVENDITA;
-SELECT * FROM VENDITAPRODOTTO;
 SELECT * FROM SCONTRINO;
 SELECT * FROM ORDINE;
+SELECT * FROM PRODOTTOVENDUTO;
