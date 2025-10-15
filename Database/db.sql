@@ -55,19 +55,17 @@ CREATE TABLE PuntoVendita (
     FOREIGN KEY (IDProvincia) REFERENCES Provincia(IDProvincia)
 );
 
-CREATE TABLE ClienteRegistrato ( --METTERCI ANCHE MAIL E NUM DI TEL?
-    /*
-    esclusi dai clienti registrati? 
-    tutti i clienti tranne quelli che hanno fatto solo (0 o più) acquisti in retail senza mai presentare la tessera 
-    */
+CREATE TABLE ClienteRegistrato ( --ci mettiamo anche nome, cognome, mail e numero di telefono?
+   
+    --esclusi dai clienti registrati tutti i clienti tranne quelli che hanno fatto solo acquisti in retail senza mai presentare la tessera 
 
-    --i clienti registrati possono non aver mai fatto acquisti!
+    --i clienti registrati possono non aver mai fatto acquisti! (caso cliente registrato online che non ha fatto acquisti)
     
     IDClienteRegistrato INT IDENTITY(4001,1) PRIMARY KEY, 
 
     TesseraFedelta BIT NOT NULL, 
-    --se è 0 allora allora il cliente registrato in questione ha fatto solo (0 o più) ordini online, non può aver fatto acquisti in retail
-    --se è 1 allora allora il cliente registrato in questione ha fatto (0 o più) ordini online e (0 o più) acquisti in retail
+    --se è 0 allora il cliente registrato in questione ha fatto solo (0 o più) ordini online, non può aver fatto acquisti in retail
+    --se è 1 allora il cliente registrato in questione ha fatto (0 o più) ordini online e/o (0 o più) acquisti in retail
     
     IDProvincia INT NOT NULL,
 
@@ -83,8 +81,9 @@ CREATE TABLE Scontrino (
     CodiceSconto BIT NOT NULL,
 
     IDClienteRegistrato INT,
-    --IDClienteRegistrato IS NULL => all'acquisto il cliente non ha presentato TesseraFedeltà (perchè non la ha o perchè l'ha dimenticata a casa) (VOGLIAMO FARE COSI? 
-    --  MAGARI E UNA STRATEGIA DELL'AZIENDA PER FARE PIU SOLDI)
+    --IDClienteRegistrato IS NULL => all'acquisto il cliente non ha presentato TesseraFedeltà (perchè non la ha o perchè l'ha dimenticata a casa) 
+        --(se ce l'ha ma l'ha dimenticata a casa non è possibile in alcun modo utilizzarla per politiche aziendali (facendo così l'azienda guadagna di più))
+        --(se il cliente perde la tessera o gli viene rubata è fregato? deve rifarla? fare la tessera costa? e se si quanto?)
     --IDClienteRegistrato NOT NULL => all'acquisto ha presentato la TesseraFedelta (verificato dall'ultimo trigger)
     
     IDPuntoVendita INT NOT NULL,
@@ -450,7 +449,7 @@ INSERT INTO Prodotto (NomeProdotto, Marchio, PrezzoBase, IDCategoria) VALUES --6
     ('Mesh Sport Shorts', 'Puma', 38.00, 1007),
     ('Sport Shorts Running', 'Adidas', 40.00, 1007),
     ('Tracksuit Essentials', 'Puma', 99.99, 1008),
-    ('Tracksuit Hoodie', 'Adidas', 99.99, 1008),
+    ('Tracksuit Hoodie', 'Adidas', 112.99, 1008),
     ('Tracksuit Set', 'Puma', 102.00, 1008),
     ('Cotton Polo Shirt', 'Ralph Lauren', 69.99, 1009),
     ('Classic Polo Cotton', 'Ralph Lauren', 72.99, 1009),
@@ -458,7 +457,7 @@ INSERT INTO Prodotto (NomeProdotto, Marchio, PrezzoBase, IDCategoria) VALUES --6
     ('Running Sneakers', 'Asics', 120.00, 1010),
     ('Sneakers Everyday', 'Asics', 118.00, 1010),
     ('Sneakers Running', 'New Balance', 115.00, 1010),
-    ('Floral Summer Dress', 'Mango', 79.99, 1011),
+    ('Floral Summer Dress', 'Mango', 112.99, 1011),
     ('Maxi Floral Dress', 'Mango', 85.00, 1011),
     ('Leather Jacket Retro', 'Michael Kors', 310.00, 1014),
     ('Flared Pants Chic', 'H&M', 59.99, 1015),
@@ -502,24 +501,122 @@ INSERT INTO PuntoVendita (IDProvincia, Indirizzo) VALUES --10 tuple
     (85, 'Via Città Sant''Angelo, 23, 00179'),
     (61, 'Via Foria, 119, 80137');
 
-INSERT INTO ClienteRegistrato (TesseraFedelta, IDProvincia) VALUES --100 tuple
-    (0, 59),
-    (1, 11),
+INSERT INTO ClienteRegistrato (TesseraFedelta, IDProvincia) VALUES --80 tuple
+    (1, 1),
+    (0, 2),
+    (0, 5),
+    (0, 5),
+    (1, 7),
+    (1, 8),
+    (0, 11),
+    (1, 15),
+    (1, 15),
+    (1, 15),
+    (1, 15),
+    (0, 15),
+    (0, 15),
+    (1, 13),
+    (0, 17),
+    (0, 18),
+    (0, 20),
+    (1, 21),
+    (1, 23),
+    (0, 25),
+    (1, 27),
+    (0, 33),
+    (1, 33),
+    (0, 33),
+    (1, 33),
+    (1, 33),
+    (1, 39),
+    (0, 39),
+    (1, 39),
+    (1, 43),
+    (0, 44),
+    (1, 44),
+    (1, 50),
+    (1, 50),
+    (0, 50),
+    (1, 50),
+    (0, 52),
+    (1, 57),
+    (1, 57),
     (0, 58),
-    (1, 75);
+    (1, 58),
+    (1, 58),
+    (1, 58),
+    (1, 58),
+    (1, 58),
+    (1, 58),
+    (1, 61),
+    (1, 61),
+    (0, 61),
+    (0, 61),
+    (0, 61),
+    (0, 62),
+    (1, 65),
+    (0, 66),
+    (0, 66),
+    (0, 67),
+    (1, 73),
+    (1, 73),
+    (0, 77),
+    (0, 80),
+    (0, 82),
+    (1, 83),
+    (1, 85),
+    (1, 85),
+    (1, 85),
+    (0, 85),
+    (0, 85),
+    (1, 86),
+    (1, 88),
+    (1, 88),
+    (1, 88),
+    (1, 91),
+    (0, 91),
+    (1, 91),
+    (1, 99),
+    (1, 100),
+    (0, 102),
+    (1, 102),
+    (1, 108),
+    (1, 110);
 
 INSERT INTO Scontrino (DataDiVendita, CodiceSconto, IDClienteRegistrato, IDPuntoVendita) VALUES --80 tuple
-    ('20250601', 1, NULL, 3002)
+    ('20250101', 1, NULL, 3002),
+    ('20250203', 0, 4018, 3001),
+    ('20250203', 0, 4014, 3001),
+    ('20250305', 1, 4018, 3001),
+    ('20250305', 0, NULL, 3004)
 
 INSERT INTO Ordine (DataDiVendita, CodiceSconto, IDClienteRegistrato) VALUES --80 tuple
-    ('20250609', 0, 4004)
-    
+    ('20250101', 0, 4005),
+    ('20250101', 0, 4005),
+    ('20250103', 1, 4007),
+    ('20250303', 0, 4007),
+    ('20250305', 0, 4018)
+
 INSERT INTO VenditaProdottoRetail (IDScontrino, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto) VALUES --240 tuple
-    (5001, 2004, 2, 0, 0)
+    (5001, 2004, 2, 0, 0),
+    (5001, 2007, 4, 0, 0),
+    (5002, 2022, 1, 0, 0),
+    (5003, 2045, 1, 0, 0),
+    (5003, 2007, 3, 0, 0),
+    (5003, 2022, 6, 0, 0),
+    (5004, 2010, 6, 0, 0),
+    (5005, 2010, 4, 0, 0)
 
 INSERT INTO VenditaProdottoOnline (IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto) VALUES --240 tuple
-    (6001, 2010, 1, 0, 0)
-
+    (6001, 2010, 1, 0, 0),
+    (6001, 2004, 3, 0, 0),
+    (6001, 2011, 4, 0, 0),
+    (6002, 2022, 1, 0, 0),
+    (6003, 2050, 2, 0, 0),
+    (6003, 2007, 3, 0, 0),
+    (6003, 2022, 7, 0, 0),
+    (6004, 2011, 1, 0, 0),
+    (6005, 2011, 5, 0, 0)
 
 
 --SELECTS:
@@ -536,7 +633,25 @@ SELECT * FROM VenditaProdottoOnline;
 
 
 
---QUERY:
+--QUERY DI CONTROLLO (TABELLA UNICA COMPLETA, ogni tupla la vendita online o retail di un prodotto in certa una quantità): 
+WITH
+    VenditaProdotto AS (SELECT IDScontrino, NULL AS IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoRetail UNION ALL 
+            SELECT NULL AS IDScontrino, IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoOnline),
+    ScontrinoOOrdine AS (SELECT IDScontrino, NULL AS IDOrdine, DataDiVendita, CodiceSconto, IDClienteRegistrato, IDPuntoVendita FROM Scontrino UNION ALL
+            SELECT NULL AS IDScontrino, IDOrdine, DataDiVendita, CodiceSconto, IDClienteRegistrato, NULL AS IDPuntoVendita FROM Ordine)
+SELECT vp.IDScontrino, vp.IDOrdine, vp.IDProdotto, prod.NomeProdotto, prod.Marchio, prod.PrezzoBase, prod.IDCategoria, ca.NomeCategoria, ca.Sesso, ca.CategoriaMerceologica,
+    vp.Quantita, vp.PrezzoUnitarioScontato, vp.Sconto, soo.DataDiVendita, soo.CodiceSconto, soo.IDClienteRegistrato, cr.TesseraFedelta,  
+    cr.IDProvincia AS IDPRovinciaClienteRegistrato, ProvinciaCliente.NomeProvincia AS NomeProvinciaCliente, ProvinciaCliente.Regione AS RegioneCliente, soo.IDPuntoVendita, 
+    pv.IDProvincia AS IDPRovinciaPuntoVendita, pv.Indirizzo AS IndirizzoPuntoVendita, ProvinciaPuntoVendita.NomeProvincia AS NomeProvinciaPuntoVendita, ProvinciaPuntoVendita.Regione 
+    AS RegionePuntoVendita
+FROM VenditaProdotto vp JOIN Prodotto prod ON vp.IDProdotto = prod.IDProdotto JOIN Categoria ca ON prod.IDCategoria = ca.IDCategoria LEFT JOIN 
+    ScontrinoOOrdine soo ON (vp.IDScontrino = soo.IDScontrino OR vp.IDOrdine = soo.IDOrdine) LEFT JOIN PuntoVendita pv ON soo.IDPuntoVendita = pv.IDPuntoVendita LEFT JOIN 
+    ClienteRegistrato cr ON soo.IDClienteRegistrato = cr.IDClienteRegistrato LEFT JOIN Provincia AS ProvinciaPuntoVendita ON 
+    pv.IDProvincia = ProvinciaPuntoVendita.IDProvincia LEFT JOIN Provincia ProvinciaCliente ON cr.IDProvincia = ProvinciaCliente.IDProvincia
+ORDER BY vp.IDOrdine, vp.IDScontrino
+
+
+--QUERY RICHIESTE:
 
 /*estrarre dai dati inseriti il valore della somma totale delle vendite (VENDITA = VENDITA SINGOLO PRODOTTO?) e la quantità degli sconti applicati 
 (NUMERO DI PRODOTTI VENDUTI SCONTATI?) (sia retail sia e-commerce) organizzati secondo categoria merceologica/articolo e regione/provincia del 
@@ -594,7 +709,7 @@ from QueryVenditeEScontiPerProdotto
 
 go
 
---somma totale dei prodotti venduti in retail e quantità degli sconti applicati in retail per regione
+--somma totale dei prodotti venduti e quantità degli sconti applicati (solo in retail) per regione
 CREATE OR ALTER VIEW QueryVenditeEScontiRetailPerRegione AS
 SELECT 
     Provincia.Regione, 
@@ -618,7 +733,7 @@ from QueryVenditeEScontiRetailPerRegione
 
 go
 
---somma totale dei prodotti venduti in retail e quantità degli sconti applicati in retail per provincia
+--somma totale dei prodotti venduti e quantità degli sconti applicati (solo in retail) per provincia
 CREATE OR ALTER VIEW QueryVenditeEScontiRetailPerProvincia AS
 SELECT 
     Provincia.NomeProvincia AS Provincia, Provincia.Regione,
@@ -647,19 +762,24 @@ il mese più proficuo dell’anno, il punto vendita più redditizio e il numero 
 
 --TODO: HO INTERPRETATO BENE LE SEGUENTI QUERY DA FARE?
 
---numero di prodotti venduti per provincia 
+--numero di prodotti venduti per provincia (sia online che retail) --TODO:RICONTROLLA
 CREATE OR ALTER VIEW QueryProdottiVendutiPerProvincia AS
 WITH 
     VenditaProdotto AS (SELECT IDScontrino, NULL AS IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoRetail UNION ALL 
-    SELECT NULL AS IDScontrino, IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoOnline)
-SELECT Provincia.NomeProvincia AS Provincia, Provincia.Regione, SUM(VenditaProdotto.Quantita) AS NumeroVendite
-FROM VenditaProdotto LEFT JOIN Scontrino ON VenditaProdotto.IDScontrino = Scontrino.IDScontrino LEFT JOIN 
-    Ordine ON VenditaProdotto.IDOrdine = Ordine.IDOrdine LEFT JOIN 
-    ClienteRegistrato ON Ordine.IDClienteRegistrato = ClienteRegistrato.IDClienteRegistrato LEFT JOIN
-    PuntoVendita ON Scontrino.IDPuntoVendita = PuntoVendita.IDPuntoVendita JOIN 
-    Provincia ON (PuntoVendita.IDProvincia = Provincia.IDProvincia OR ClienteRegistrato.IDProvincia = Provincia.IDProvincia)
-GROUP BY Provincia.IDProvincia, Provincia.NomeProvincia, Provincia.Regione;
---ORDER BY Provincia.NomeProvincia;
+            SELECT NULL AS IDScontrino, IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoOnline),
+    ScontrinoConProvinciaPuntoVendita AS (SELECT Scontrino.IDScontrino, Provincia.IDProvincia, Provincia.NomeProvincia AS Provincia, Provincia.Regione
+            FROM Scontrino JOIN PuntoVendita ON Scontrino.IDPuntoVendita = PuntoVendita.IDPuntoVendita JOIN Provincia
+                ON PuntoVendita.IDProvincia = Provincia.IDProvincia),
+    OrdineConProvinciaCliente AS (SELECT Ordine.IDOrdine, Provincia.IDProvincia, Provincia.NomeProvincia AS Provincia, Provincia.Regione
+            FROM Ordine JOIN ClienteRegistrato ON Ordine.IDClienteRegistrato = ClienteRegistrato.IDClienteRegistrato JOIN Provincia 
+                ON ClienteRegistrato.IDProvincia = Provincia.IDProvincia),
+    OrdineOScontrinoConProvincia AS (SELECT IDScontrino, NULL AS IDOrdine, IDProvincia, Provincia, Regione FROM ScontrinoConProvinciaPuntoVendita UNION ALL 
+                SELECT NULL AS IDScontrino, IDOrdine, IDProvincia, Provincia, Regione FROM OrdineConProvinciaCliente)
+SELECT OrdineOScontrinoConProvincia.Provincia, OrdineOScontrinoConProvincia.Regione, SUM(VenditaProdotto.Quantita) AS NumeroVendite
+FROM VenditaProdotto LEFT JOIN OrdineOScontrinoConProvincia ON (VenditaProdotto.IDScontrino = OrdineOScontrinoConProvincia.IDScontrino OR 
+    VenditaProdotto.IDOrdine = OrdineOScontrinoConProvincia.IDOrdine)
+GROUP BY OrdineOScontrinoConProvincia.IDProvincia, OrdineOScontrinoConProvincia.Provincia, OrdineOScontrinoConProvincia.Regione;
+--ORDER BY OrdineOScontrinoConProvincia.NomeProvincia;
 
 go
 
@@ -697,19 +817,20 @@ CREATE OR ALTER VIEW QueryMesePiuProficuo AS
 WITH 
     VenditaProdotto AS (SELECT IDScontrino, NULL AS IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoRetail UNION ALL 
             SELECT NULL AS IDScontrino, IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoOnline),
-    DDV AS (SELECT (CASE WHEN Ordine.DataDiVendita IS NULL THEN Scontrino.DataDiVendita ELSE Ordine.DataDiVendita END) AS DataDiVendita, VenditaProdotto.Quantita
+    DDV AS (SELECT (CASE WHEN Ordine.DataDiVendita IS NULL THEN Scontrino.DataDiVendita ELSE Ordine.DataDiVendita END) AS DataDiVendita, 
+                VenditaProdotto.Quantita * VenditaProdotto.PrezzoUnitarioScontato AS PrezzoComplessivoScontato
             FROM VenditaProdotto LEFT JOIN
                 Scontrino ON VenditaProdotto.IDScontrino = Scontrino.IDScontrino LEFT JOIN 
                 Ordine ON VenditaProdotto.IDOrdine = Ordine.IDOrdine),
-    tmp1 AS (SELECT DDV.DataDiVendita, DATENAME(MONTH, DDV.DataDiVendita) AS MeseDel2025, SUM(DDV.Quantita) AS NumeroVendite
+    tmp1 AS (SELECT DDV.DataDiVendita, DATENAME(MONTH, DDV.DataDiVendita) AS MeseDel2025, SUM(DDV.PrezzoComplessivoScontato) AS Fatturato
             FROM DDV
             GROUP BY DDV.DataDiVendita),
-    tmp2 AS (SELECT tmp1.MeseDel2025, SUM(tmp1.NumeroVendite) AS NumeroVendite
+    tmp2 AS (SELECT tmp1.MeseDel2025, SUM(tmp1.Fatturato) AS Fatturato
             FROM tmp1
             GROUP BY tmp1.MeseDel2025) 
-SELECT tmp2.MeseDel2025 AS MeseDel2025, tmp2.NumeroVendite
+SELECT tmp2.MeseDel2025 AS MeseDel2025, tmp2.Fatturato
 FROM tmp2
-WHERE tmp2.NumeroVendite = (SELECT MAX(tmp2.NumeroVendite)
+WHERE tmp2.Fatturato = (SELECT MAX(tmp2.Fatturato)
     FROM tmp2);
 --ORDER BY tmp2.MeseDel2025;
 
@@ -734,7 +855,7 @@ WITH
             GROUP BY tmp1.IDPuntoVendita, tmp1.Indirizzo, tmp1.Provincia, tmp1.Regione) 
 SELECT tmp2.IDPuntoVendita, tmp2.Indirizzo, tmp2.Provincia, tmp2.Regione, tmp2.Fatturato
 FROM tmp2
-WHERE tmp2.Fatturato = (SELECT MAX(tmp2.Fatturato) AS Fatturato
+WHERE tmp2.Fatturato = (SELECT MAX(tmp2.Fatturato)
     FROM tmp2);
 --ORDER BY tmp2.Provincia;
 
