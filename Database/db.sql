@@ -254,7 +254,7 @@ END;
 
 GO
 
-CREATE TRIGGER trg_VerificaTesseraFedelta_Scontrino
+CREATE TRIGGER trg_VerificaTesseraFedeltaScontrino
 ON Scontrino
 AFTER INSERT, UPDATE
 AS
@@ -284,7 +284,7 @@ GO
 
 --INSERTS:
 
-INSERT INTO Provincia (NomeProvincia, Regione) VALUES
+INSERT INTO Provincia (NomeProvincia, Regione) VALUES --110 tuple
     ('Agrigento', 'Sicilia'),
     ('Alessandria', 'Piemonte'),
     ('Ancona', 'Marche'),
@@ -396,7 +396,7 @@ INSERT INTO Provincia (NomeProvincia, Regione) VALUES
     ('Vicenza', 'Veneto'),
     ('Viterbo', 'Lazio');
 
-INSERT INTO Categoria (NomeCategoria, Sesso, CategoriaMerceologica) VALUES
+INSERT INTO Categoria (NomeCategoria, Sesso, CategoriaMerceologica) VALUES --30 tuple
     ('pantaloni cargo', 'uomo', 'pantaloni'),
     ('jeans slim fit', 'uomo', 'pantaloni'),
     ('t-shirt basic', 'uomo', 'magliette'),
@@ -428,7 +428,7 @@ INSERT INTO Categoria (NomeCategoria, Sesso, CategoriaMerceologica) VALUES
     ('giacca antivento', 'unisex', 'giacche'),
     ('cintura in pelle', 'unisex', 'accessori');
 
-INSERT INTO Prodotto (NomeProdotto, Marchio, PrezzoBase, IDCategoria) VALUES
+INSERT INTO Prodotto (NomeProdotto, Marchio, PrezzoBase, IDCategoria) VALUES --60 tuple
     ('Slim Cargo Pant', 'G-Star', 85.00, 1001),
     ('Slim Fit Cargo', 'G-Star', 87.00, 1001),
     ('Denim Slim Jeans', 'Levi''s', 92.50, 1002),
@@ -490,7 +490,7 @@ INSERT INTO Prodotto (NomeProdotto, Marchio, PrezzoBase, IDCategoria) VALUES
     ('Leather Belt Classic', 'Gucci', 205.00, 1030),
     ('Leather Belt Signature', 'Gucci', 205.00, 1030);
 
-INSERT INTO PuntoVendita (IDProvincia, Indirizzo) VALUES
+INSERT INTO PuntoVendita (IDProvincia, Indirizzo) VALUES --10 tuple
     (58, 'Via Torino, 1, 20123'),
     (58, 'Corso Buenos Aires, 2, 20124'),
     (50, 'Corso Roma, 60, 26900'),
@@ -502,57 +502,11 @@ INSERT INTO PuntoVendita (IDProvincia, Indirizzo) VALUES
     (85, 'Via Città Sant''Angelo, 23, 00179'),
     (61, 'Via Foria, 119, 80137');
 
-INSERT INTO ClienteRegistrato (TesseraFedelta, IDProvincia) VALUES 
-    (1, 61),
-    (0, 55),
-    (1, 78),
-    (0, 12),
-    (1, 92),
-    (0, 34),
-    (1, 7),
-    (0, 50),
-    (1, 19),
-    (1, 81),
-    (0, 3),
-    (1, 44),
-    (0, 68),
-    (1, 27),
-    (1, 101),
-    (0, 14),
-    (1, 88),
-    (0, 6),
-    (1, 72),
-    (0, 33),
-    (1, 17),
-    (1, 90),
-    (0, 24),
-    (1, 59),
-    (0, 40),
-    (1, 2),
-    (1, 85),
-    (0, 13),
-    (1, 48),
-    (0, 100),
-    (1, 31),
-    (1, 64),
-    (0, 21),
-    (1, 95),
-    (0, 10),
-    (1, 77),
-    (1, 41),
-    (0, 22),
-    (1, 84),
-    (0, 37),
-    (1, 52),
-    (1, 8),
-    (0, 73),
-    (1, 29),
-    (0, 98),
-    (1, 5),
-    (1, 66),
-    (0, 36),
-    (1, 93),
-    (0, 25);
+INSERT INTO ClienteRegistrato (TesseraFedelta, IDProvincia) VALUES --100 tuple
+    (0, 59),
+    (1, 11),
+    (0, 58),
+    (1, 75);
 
 INSERT INTO Scontrino (DataDiVendita, CodiceSconto, IDClienteRegistrato, IDPuntoVendita) VALUES --80 tuple
     ('20250601', 1, NULL, 3002)
@@ -588,9 +542,15 @@ SELECT * FROM VenditaProdottoOnline;
 (NUMERO DI PRODOTTI VENDUTI SCONTATI?) (sia retail sia e-commerce) organizzati secondo categoria merceologica/articolo e regione/provincia del 
 punto vendita; estrarre anche le informazioni relative alle visualizzazioni grafiche*/
 
---TODO: HO INTERPRETATO BENE LE SEGUENTI 4 QUERY DA FARE?
+--TODO: HO INTERPRETATO BENE LE SEGUENTI QUERY DA FARE?
+
+go
 
 --somma totale dei prodotti venduti e quantità degli sconti applicati per categoria merceologica
+CREATE OR ALTER VIEW QueryVenditeEScontiPerCategoriaMerceologica AS 
+WITH
+    VenditaProdotto AS (SELECT IDScontrino, NULL AS IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoRetail UNION ALL 
+            SELECT NULL AS IDScontrino, IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoOnline)
 SELECT 
     Categoria.CategoriaMerceologica, 
     SUM(VenditaProdotto.Quantita) AS NumeroProdottiVenduti, 
@@ -598,14 +558,23 @@ SELECT
             WHEN VenditaProdotto.Sconto IS NULL THEN 0
             ELSE VenditaProdotto.Quantita
         END) AS QuantitaScontiApplicati
-FROM (SELECT IDScontrino, NULL AS IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoRetail UNION ALL 
-    SELECT NULL AS IDScontrino, IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoOnline) AS VenditaProdotto
-    JOIN Prodotto ON VenditaProdotto.IDProdotto = Prodotto.IDProdotto
-    JOIN Categoria ON Prodotto.IDCategoria = Categoria.IDCategoria
-GROUP BY Categoria.CategoriaMerceologica
-ORDER BY Categoria.CategoriaMerceologica ASC;
+FROM VenditaProdotto JOIN Prodotto ON VenditaProdotto.IDProdotto = Prodotto.IDProdotto JOIN Categoria ON Prodotto.IDCategoria = Categoria.IDCategoria
+GROUP BY Categoria.CategoriaMerceologica;
+--ORDER BY Categoria.CategoriaMerceologica ASC;
+
+go
+
+--test QueryVenditeEScontiPerCategoriaMerceologica
+select *
+from QueryVenditeEScontiPerCategoriaMerceologica
+
+go
 
 --somma totale dei prodotti venduti e quantità degli sconti applicati per articolo
+CREATE OR ALTER VIEW QueryVenditeEScontiPerProdotto AS 
+WITH
+    VenditaProdotto AS (SELECT IDScontrino, NULL AS IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoRetail UNION ALL 
+            SELECT NULL AS IDScontrino, IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoOnline)
 SELECT 
     Prodotto.NomeProdotto AS Prodotto, 
     SUM(VenditaProdotto.Quantita) AS NumeroProdottiVenduti, 
@@ -613,13 +582,20 @@ SELECT
             WHEN VenditaProdotto.Sconto IS NULL THEN 0
             ELSE VenditaProdotto.Quantita
         END) AS QuantitaScontiApplicati
-FROM (SELECT IDScontrino, NULL AS IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoRetail UNION ALL 
-    SELECT NULL AS IDScontrino, IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoOnline) AS VenditaProdotto
-    JOIN Prodotto ON VenditaProdotto.IDProdotto = Prodotto.IDProdotto
-GROUP BY Prodotto.IDProdotto, Prodotto.NomeProdotto 
-ORDER BY Prodotto.NomeProdotto ASC;
+FROM VenditaProdotto JOIN Prodotto ON VenditaProdotto.IDProdotto = Prodotto.IDProdotto
+GROUP BY Prodotto.IDProdotto, Prodotto.NomeProdotto; 
+--ORDER BY Prodotto.NomeProdotto ASC;
 
---somma totale dei prodotti venduti e quantità degli sconti applicati per regione
+go
+
+--test QueryVenditeEScontiPerProdotto
+select *
+from QueryVenditeEScontiPerProdotto
+
+go
+
+--somma totale dei prodotti venduti in retail e quantità degli sconti applicati in retail per regione
+CREATE OR ALTER VIEW QueryVenditeEScontiRetailPerRegione AS
 SELECT 
     Provincia.Regione, 
     SUM(VenditaProdottoRetail.Quantita) AS NumeroProdottiVenduti, 
@@ -631,10 +607,19 @@ FROM VenditaProdottoRetail JOIN Prodotto ON VenditaProdottoRetail.IDProdotto = P
     Scontrino ON VenditaProdottoRetail.IDScontrino = Scontrino.IDScontrino JOIN 
     PuntoVendita ON Scontrino.IDPuntoVendita = PuntoVendita.IDPuntoVendita JOIN
     Provincia ON PuntoVendita.IDProvincia = Provincia.IDProvincia
-GROUP BY Provincia.Regione 
-ORDER BY Provincia.Regione ASC;
+GROUP BY Provincia.Regione; 
+--ORDER BY Provincia.Regione ASC;
 
---somma totale dei prodotti venduti e quantità degli sconti applicati per provincia
+go
+
+--test QueryVenditeEScontiRetailPerRegione
+select *
+from QueryVenditeEScontiRetailPerRegione
+
+go
+
+--somma totale dei prodotti venduti in retail e quantità degli sconti applicati in retail per provincia
+CREATE OR ALTER VIEW QueryVenditeEScontiRetailPerProvincia AS
 SELECT 
     Provincia.NomeProvincia AS Provincia, Provincia.Regione,
     SUM(VenditaProdottoRetail.Quantita) AS NumeroProdottiVenduti, 
@@ -646,87 +631,130 @@ FROM VenditaProdottoRetail JOIN Prodotto ON VenditaProdottoRetail.IDProdotto = P
     Scontrino ON VenditaProdottoRetail.IDScontrino = Scontrino.IDScontrino JOIN 
     PuntoVendita ON Scontrino.IDPuntoVendita = PuntoVendita.IDPuntoVendita JOIN
     Provincia ON PuntoVendita.IDProvincia = Provincia.IDProvincia
-GROUP BY Provincia.IDProvincia, Provincia.NomeProvincia, Provincia.Regione 
-ORDER BY Provincia.NomeProvincia ASC;
+GROUP BY Provincia.IDProvincia, Provincia.NomeProvincia, Provincia.Regione; 
+--ORDER BY Provincia.NomeProvincia ASC;
+
+go
+
+--test QueryVenditeEScontiRetailPerProvincia
+select *
+from QueryVenditeEScontiRetailPerProvincia
+
+go
 
 /*creare le visualizzazioni per rappresentare le vendite per provincia (sia online che retail? io faccio entrambi...), la maggior categoria merceologica acquistata, 
 il mese più proficuo dell’anno, il punto vendita più redditizio e il numero di tessere fedeltà totali*/
 
---TODO: HO INTERPRETATO BENE LE SEGUENTI 5 QUERY DA FARE?
+--TODO: HO INTERPRETATO BENE LE SEGUENTI QUERY DA FARE?
 
 --numero di prodotti venduti per provincia 
+CREATE OR ALTER VIEW QueryProdottiVendutiPerProvincia AS
+WITH 
+    VenditaProdotto AS (SELECT IDScontrino, NULL AS IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoRetail UNION ALL 
+    SELECT NULL AS IDScontrino, IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoOnline)
 SELECT Provincia.NomeProvincia AS Provincia, Provincia.Regione, SUM(VenditaProdotto.Quantita) AS NumeroVendite
-FROM (SELECT IDScontrino, NULL AS IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoRetail UNION ALL 
-    SELECT NULL AS IDScontrino, IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoOnline) AS VenditaProdotto LEFT JOIN
-    Scontrino ON VenditaProdotto.IDScontrino = Scontrino.IDScontrino LEFT JOIN 
+FROM VenditaProdotto LEFT JOIN Scontrino ON VenditaProdotto.IDScontrino = Scontrino.IDScontrino LEFT JOIN 
     Ordine ON VenditaProdotto.IDOrdine = Ordine.IDOrdine LEFT JOIN 
     ClienteRegistrato ON Ordine.IDClienteRegistrato = ClienteRegistrato.IDClienteRegistrato LEFT JOIN
     PuntoVendita ON Scontrino.IDPuntoVendita = PuntoVendita.IDPuntoVendita JOIN 
     Provincia ON (PuntoVendita.IDProvincia = Provincia.IDProvincia OR ClienteRegistrato.IDProvincia = Provincia.IDProvincia)
-GROUP BY Provincia.IDProvincia, Provincia.NomeProvincia, Provincia.Regione
-ORDER BY Provincia.NomeProvincia
+GROUP BY Provincia.IDProvincia, Provincia.NomeProvincia, Provincia.Regione;
+--ORDER BY Provincia.NomeProvincia;
+
+go
+
+--test QueryProdottiVendutiPerProvincia
+select *
+from QueryProdottiVendutiPerProvincia
+
+go
 
 --categoria merceologica più acquistata
-SELECT tmp1.CategoriaMerceologica AS CategoriaMerceologicaPiuAcquistata, tmp1.NumeroVendite
-FROM (SELECT Categoria.CategoriaMerceologica, SUM(VenditaProdotto.Quantita) AS NumeroVendite
-    FROM (SELECT IDScontrino, NULL AS IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoRetail UNION ALL 
-            SELECT NULL AS IDScontrino, IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoOnline) AS VenditaProdotto JOIN
-        Prodotto ON VenditaProdotto.IDProdotto = Prodotto.IDProdotto JOIN 
-        Categoria ON Prodotto.IDCategoria = Categoria.IDCategoria
-    GROUP BY Categoria.CategoriaMerceologica) AS tmp1
-WHERE tmp1.NumeroVendite = (SELECT MAX(tmp2.NumeroVendite)
-    FROM (SELECT Categoria.CategoriaMerceologica, SUM(VenditaProdotto.Quantita) AS NumeroVendite
-        FROM (SELECT IDScontrino, NULL AS IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoRetail UNION ALL 
-                SELECT NULL AS IDScontrino, IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoOnline) AS VenditaProdotto JOIN
-            Prodotto ON VenditaProdotto.IDProdotto = Prodotto.IDProdotto JOIN 
-            Categoria ON Prodotto.IDCategoria = Categoria.IDCategoria
-        GROUP BY Categoria.CategoriaMerceologica) AS tmp2)
-ORDER BY tmp1.CategoriaMerceologica
+CREATE OR ALTER VIEW QueryCategoriaMerceologicaPiuAcquistata AS
+WITH
+    VenditaProdotto AS (SELECT IDScontrino, NULL AS IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoRetail UNION ALL 
+            SELECT NULL AS IDScontrino, IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoOnline),
+    tmp AS (SELECT Categoria.CategoriaMerceologica, SUM(VenditaProdotto.Quantita) AS NumeroVendite
+            FROM VenditaProdotto JOIN
+                Prodotto ON VenditaProdotto.IDProdotto = Prodotto.IDProdotto JOIN 
+                Categoria ON Prodotto.IDCategoria = Categoria.IDCategoria
+            GROUP BY Categoria.CategoriaMerceologica)
+SELECT tmp.CategoriaMerceologica AS CategoriaMerceologicaPiuAcquistata, tmp.NumeroVendite
+FROM tmp
+WHERE tmp.NumeroVendite = (SELECT MAX(tmp.NumeroVendite) FROM tmp);
+--ORDER BY tmp.CategoriaMerceologica;
 
-SET LANGUAGE Italian
+go
+
+--test QueryCategoriaMerceologicaPiuAcquistata
+select *
+from QueryCategoriaMerceologicaPiuAcquistata
+
+go
 
 --mese più proficuo dell'anno
-SELECT tmp2.MeseDel2025 AS MeseDel2025, tmp2.NumeroVendite
-FROM (SELECT tmp1.MeseDel2025, SUM(tmp1.NumeroVendite) AS NumeroVendite
-    FROM (SELECT DDV.DataDiVendita, DATENAME(MONTH, DDV.DataDiVendita) AS MeseDel2025, SUM(DDV.Quantita) AS NumeroVendite
-        FROM (SELECT (CASE WHEN Ordine.DataDiVendita IS NULL THEN Scontrino.DataDiVendita ELSE Ordine.DataDiVendita END) AS DataDiVendita, VenditaProdotto.Quantita
-            FROM (SELECT IDScontrino, NULL AS IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoRetail UNION ALL 
-                SELECT NULL AS IDScontrino, IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoOnline) AS VenditaProdotto LEFT JOIN
+CREATE OR ALTER VIEW QueryMesePiuProficuo AS
+WITH 
+    VenditaProdotto AS (SELECT IDScontrino, NULL AS IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoRetail UNION ALL 
+            SELECT NULL AS IDScontrino, IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoOnline),
+    DDV AS (SELECT (CASE WHEN Ordine.DataDiVendita IS NULL THEN Scontrino.DataDiVendita ELSE Ordine.DataDiVendita END) AS DataDiVendita, VenditaProdotto.Quantita
+            FROM VenditaProdotto LEFT JOIN
                 Scontrino ON VenditaProdotto.IDScontrino = Scontrino.IDScontrino LEFT JOIN 
-                Ordine ON VenditaProdotto.IDOrdine = Ordine.IDOrdine) AS DDV
-        GROUP BY DDV.DataDiVendita) AS tmp1
-    GROUP BY tmp1.MeseDel2025) AS tmp2
-WHERE tmp2.NumeroVendite = (SELECT MAX(tmp3.NumeroVendite)
-    FROM (SELECT tmp1.MeseDel2025, SUM(tmp1.NumeroVendite) AS NumeroVendite
-        FROM (SELECT DDV.DataDiVendita, DATENAME(MONTH, DDV.DataDiVendita) AS MeseDel2025, SUM(DDV.Quantita) AS NumeroVendite
-            FROM (SELECT (CASE WHEN Ordine.DataDiVendita IS NULL THEN Scontrino.DataDiVendita ELSE Ordine.DataDiVendita END) AS DataDiVendita, VenditaProdotto.Quantita
-                FROM (SELECT IDScontrino, NULL AS IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoRetail UNION ALL 
-                    SELECT NULL AS IDScontrino, IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoOnline) AS VenditaProdotto LEFT JOIN
-                    Scontrino ON VenditaProdotto.IDScontrino = Scontrino.IDScontrino LEFT JOIN 
-                    Ordine ON VenditaProdotto.IDOrdine = Ordine.IDOrdine) AS DDV
-            GROUP BY DDV.DataDiVendita) AS tmp1
-        GROUP BY tmp1.MeseDel2025) AS tmp3)
-ORDER BY tmp2.MeseDel2025
+                Ordine ON VenditaProdotto.IDOrdine = Ordine.IDOrdine),
+    tmp1 AS (SELECT DDV.DataDiVendita, DATENAME(MONTH, DDV.DataDiVendita) AS MeseDel2025, SUM(DDV.Quantita) AS NumeroVendite
+            FROM DDV
+            GROUP BY DDV.DataDiVendita),
+    tmp2 AS (SELECT tmp1.MeseDel2025, SUM(tmp1.NumeroVendite) AS NumeroVendite
+            FROM tmp1
+            GROUP BY tmp1.MeseDel2025) 
+SELECT tmp2.MeseDel2025 AS MeseDel2025, tmp2.NumeroVendite
+FROM tmp2
+WHERE tmp2.NumeroVendite = (SELECT MAX(tmp2.NumeroVendite)
+    FROM tmp2);
+--ORDER BY tmp2.MeseDel2025;
+
+go
+
+--test QueryMesePiuProficuo
+select *
+from QueryMesePiuProficuo
+
+go
 
 --punto vendita più redditizio
-SELECT tmp2.IDPuntoVendita, tmp2.Indirizzo, tmp2.Provincia, tmp2.Regione, tmp2.Fatturato
-FROM (SELECT tmp1.IDPuntoVendita, tmp1.Indirizzo, tmp1.Provincia, tmp1.Regione, SUM(tmp1.PrezzoComplessivoProdotto) AS Fatturato
-    FROM (SELECT PuntoVendita.IDPuntoVendita, PuntoVendita.Indirizzo, Provincia.NomeProvincia AS Provincia, Provincia.Regione,
-            (VenditaProdottoRetail.PrezzoUnitarioScontato * VenditaProdottoRetail.Quantita) AS PrezzoComplessivoProdotto
-        FROM VenditaProdottoRetail JOIN Scontrino ON VenditaProdottoRetail.IDScontrino = Scontrino.IDScontrino JOIN 
-            PuntoVendita ON Scontrino.IDPuntoVendita = PuntoVendita.IDPuntoVendita JOIN
-            Provincia ON PuntoVendita.IDProvincia = Provincia.IDProvincia) AS tmp1
-    GROUP BY tmp1.IDPuntoVendita, tmp1.Indirizzo, tmp1.Provincia, tmp1.Regione) AS tmp2
-WHERE tmp2.Fatturato = (SELECT MAX(tmp3.Fatturato) AS Fatturato
-    FROM (SELECT tmp1.IDPuntoVendita, tmp1.Indirizzo, tmp1.Provincia, tmp1.Regione, SUM(tmp1.PrezzoComplessivoProdotto) AS Fatturato
-        FROM (SELECT PuntoVendita.IDPuntoVendita, PuntoVendita.Indirizzo, Provincia.NomeProvincia AS Provincia, Provincia.Regione,
+CREATE OR ALTER VIEW QueryPuntoVenditaPiuRedditizio AS
+WITH
+    tmp1 AS (SELECT PuntoVendita.IDPuntoVendita, PuntoVendita.Indirizzo, Provincia.NomeProvincia AS Provincia, Provincia.Regione,
                 (VenditaProdottoRetail.PrezzoUnitarioScontato * VenditaProdottoRetail.Quantita) AS PrezzoComplessivoProdotto
             FROM VenditaProdottoRetail JOIN Scontrino ON VenditaProdottoRetail.IDScontrino = Scontrino.IDScontrino JOIN 
                 PuntoVendita ON Scontrino.IDPuntoVendita = PuntoVendita.IDPuntoVendita JOIN
-                Provincia ON PuntoVendita.IDProvincia = Provincia.IDProvincia) AS tmp1
-        GROUP BY tmp1.IDPuntoVendita, tmp1.Indirizzo, tmp1.Provincia, tmp1.Regione) AS tmp3)
-ORDER BY tmp2.Provincia
+                Provincia ON PuntoVendita.IDProvincia = Provincia.IDProvincia),
+    tmp2 AS (SELECT tmp1.IDPuntoVendita, tmp1.Indirizzo, tmp1.Provincia, tmp1.Regione, SUM(tmp1.PrezzoComplessivoProdotto) AS Fatturato
+            FROM tmp1
+            GROUP BY tmp1.IDPuntoVendita, tmp1.Indirizzo, tmp1.Provincia, tmp1.Regione) 
+SELECT tmp2.IDPuntoVendita, tmp2.Indirizzo, tmp2.Provincia, tmp2.Regione, tmp2.Fatturato
+FROM tmp2
+WHERE tmp2.Fatturato = (SELECT MAX(tmp2.Fatturato) AS Fatturato
+    FROM tmp2);
+--ORDER BY tmp2.Provincia;
+
+go
+
+--test QueryPuntoVenditaPiuRedditizio
+select *
+from QueryPuntoVenditaPiuRedditizio
+
+go
 
 --numero di tessere fedeltà
-SELECT SUM(CONVERT(INT, ClienteRegistrato.TesseraFedelta)) 
-FROM ClienteRegistrato
+CREATE OR ALTER VIEW QueryNumeroTessereFedelta AS
+SELECT SUM(CONVERT(INT, ClienteRegistrato.TesseraFedelta)) NumeroTessere 
+FROM ClienteRegistrato;
+
+go
+
+--test QueryNumeroTessereFedelta
+select *
+from QueryNumeroTessereFedelta
+
+go
