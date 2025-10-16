@@ -727,8 +727,8 @@ il mese più proficuo dell’anno, il punto vendita più redditizio e il numero 
 
 --TODO: HO INTERPRETATO BENE LE SEGUENTI QUERY DA FARE?
 
---numero di prodotti venduti per provincia (sia online che retail) --TODO:RICONTROLLA
-CREATE OR ALTER VIEW QueryProdottiVendutiPerProvincia AS
+--numero di prodotti venduti per provincia (sia online che retail) => grafico 2
+CREATE OR ALTER VIEW QueryProdottiVendutiPerProvincia AS --RICONTROLLA
 WITH 
     VenditaProdotto AS (SELECT IDScontrino, NULL AS IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoRetail UNION ALL 
             SELECT NULL AS IDScontrino, IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoOnline),
@@ -741,8 +741,8 @@ WITH
     OrdineOScontrinoConProvincia AS (SELECT IDScontrino, NULL AS IDOrdine, IDProvincia, Provincia, Regione FROM ScontrinoConProvincia UNION ALL 
                 SELECT NULL AS IDScontrino, IDOrdine, IDProvincia, Provincia, Regione FROM OrdineConProvincia)
 SELECT OrdineOScontrinoConProvincia.Provincia, OrdineOScontrinoConProvincia.Regione, SUM(VenditaProdotto.Quantita) AS NumeroVendite
-FROM VenditaProdotto LEFT JOIN OrdineOScontrinoConProvincia ON (VenditaProdotto.IDScontrino = OrdineOScontrinoConProvincia.IDScontrino OR 
-    VenditaProdotto.IDOrdine = OrdineOScontrinoConProvincia.IDOrdine)
+FROM VenditaProdotto LEFT JOIN OrdineOScontrinoConProvincia ON (ISNULL(VenditaProdotto.IDScontrino, -1) = ISNULL(OrdineOScontrinoConProvincia.IDScontrino, -2) OR 
+    ISNULL(VenditaProdotto.IDOrdine, -3) = ISNULL(OrdineOScontrinoConProvincia.IDOrdine, -4)) --CORREGGI e CORREGGI STA COSA NELLE ALTRE QUERY DOVE ACCADE
 GROUP BY OrdineOScontrinoConProvincia.IDProvincia, OrdineOScontrinoConProvincia.Provincia, OrdineOScontrinoConProvincia.Regione;
 --ORDER BY OrdineOScontrinoConProvincia.NomeProvincia;
 
@@ -754,8 +754,9 @@ from QueryProdottiVendutiPerProvincia
 
 go
 
---categoria merceologica più acquistata
-CREATE OR ALTER VIEW QueryCategoriaMerceologicaPiuAcquistata AS
+--OLD: categoria merceologica più acquistata
+--NEW: numero di acquisti per categoria merceologica => grafico 4 
+CREATE OR ALTER VIEW QueryCategoriaMerceologicaPiuAcquistata AS --CAMBIARLA
 WITH
     VenditaProdotto AS (SELECT IDScontrino, NULL AS IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoRetail UNION ALL 
             SELECT NULL AS IDScontrino, IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoOnline),
@@ -777,8 +778,9 @@ from QueryCategoriaMerceologicaPiuAcquistata
 
 go
 
---mese più proficuo dell'anno
-CREATE OR ALTER VIEW QueryMesePiuProficuo AS
+--OLD: mese più proficuo dell'anno
+--NEW: fatturato per mese => grafico 1
+CREATE OR ALTER VIEW QueryMesePiuProficuo AS --CAMBIARLA
 WITH 
     VenditaProdotto AS (SELECT IDScontrino, NULL AS IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoRetail UNION ALL 
             SELECT NULL AS IDScontrino, IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoOnline),
@@ -807,8 +809,9 @@ from QueryMesePiuProficuo
 
 go
 
---punto vendita più redditizio
-CREATE OR ALTER VIEW QueryPuntoVenditaPiuRedditizio AS
+--OLD: punto vendita più redditizio
+--NEW: fatturato per punto vendita => grafico 2
+CREATE OR ALTER VIEW QueryPuntoVenditaPiuRedditizio AS --DA CAMBIARE
 WITH
     tmp1 AS (SELECT PuntoVendita.IDPuntoVendita, PuntoVendita.Indirizzo, Provincia.NomeProvincia AS Provincia, Provincia.Regione,
                 (VenditaProdottoRetail.PrezzoUnitarioScontato * VenditaProdottoRetail.Quantita) AS PrezzoComplessivoProdotto
@@ -832,7 +835,7 @@ from QueryPuntoVenditaPiuRedditizio
 
 go
 
---numero di tessere fedeltà
+--numero di tessere fedeltà => nessun grafico
 CREATE OR ALTER VIEW QueryNumeroTessereFedelta AS
 SELECT SUM(CONVERT(INT, ClienteRegistrato.TesseraFedelta)) NumeroTessere 
 FROM ClienteRegistrato;
