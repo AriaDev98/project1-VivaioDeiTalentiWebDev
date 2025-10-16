@@ -1419,7 +1419,7 @@ WITH
 SELECT tmp1.MeseDel2025, SUM(tmp1.Fatturato) AS Fatturato
 FROM tmp1
 GROUP BY tmp1.MeseDel2025;
---ORDER BY SUM(tmp1.Fatturato) DESC;
+--ORDER BY tmp1.MeseDel2025 ASC;
 
 go
 
