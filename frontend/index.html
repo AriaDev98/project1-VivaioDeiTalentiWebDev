@@ -9,15 +9,114 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Dashboard Z-Glam</h1>
-    <p>
-        Ricavo totale (calcolato): <b id="tot"></b> — 
-        Vendite con coupon 30%: <b id="nCoupon"></b> — 
-        Vendite con tessera: <b id="nCard"></b>
-     </p>
+<h1>Dashboard Z-Glam</h1>
 
-     <h3>Vendite per provincia (ricavo calcolato)</h3>
-     <canvas id="byProv" width="600" height="300"></canvas>
+<div class="page">
+    <div class="layout">
+      <!-- COLONNA SINISTRA: tabelle --> 
+      <div class="left">
+        <h2>Riepilogo vendite e sconti</h2>
+        <!--Tessere fedeltà totali   TODO: DA CAMBIARE LA SUA POSIZIONE SULLA PAGINA --> 
+        <div class="kpis">
+        <div class="kpi">
+            <div class="kpi-label">Tessere fedeltà totali</div>
+            <div id="kpiTessere" class="kpi-value">0</div>
+        </div>
+        </div>
+        <p id="status" class="muted">OK</p>
+
+        <!-- Per categoria -->
+        <section class="table-group">
+          <h3>Per categoria merceologica</h3>
+          <table class="grid">
+            <thead>
+              <tr>
+                <th>CategoriaMerceologica</th>
+                <th class="num">NumeroProdottiVenduti</th>
+                <th class="num">QuantitaScontiApplicati</th>
+              </tr>
+            </thead>
+            <tbody id="tb-cat"></tbody>
+          </table>
+        </section>
+
+        <!-- Per prodotto -->
+        <section class="table-group">
+          <h3>Per prodotto</h3>
+          <table class="grid">
+            <thead>
+              <tr>
+                <th>Prodotto</th>
+                <th class="num">NumeroProdottiVenduti</th>
+                <th class="num">QuantitaScontiApplicati</th>
+              </tr>
+            </thead>
+            <tbody id="tb-prod"></tbody>
+          </table>
+        </section>
+
+        <!-- Per regione (retail) -->
+        <section class="table-group">
+          <h3>Per regione (solo retail)</h3>
+          <table class="grid">
+            <thead>
+              <tr>
+                <th>Regione</th>
+                <th class="num">NumeroProdottiVenduti</th>
+                <th class="num">QuantitaScontiApplicati</th>
+              </tr>
+            </thead>
+            <tbody id="tb-reg"></tbody>
+          </table>
+        </section>
+
+        <!-- Per provincia (retail) -->
+        <section class="table-group">
+          <h3>Per provincia (solo retail)</h3>
+          <table class="grid">
+            <thead>
+              <tr>
+                <th>Provincia</th>
+                <th>Regione</th>
+                <th class="num">NumeroProdottiVenduti</th>
+                <th class="num">QuantitaScontiApplicati</th>
+              </tr>
+            </thead>
+            <tbody id="tb-prov"></tbody>
+          </table>
+        </section>
+      </div>
+
+      <!-- spazio per grafici -->
+      <aside class="right">
+            <div class="card viz">
+
+                <h3>Visualizzazioni</h3>
+                <h4 style="margin-top:8px;">Prodotti venduti per provincia</h4>
+                <div class="chart-wrap" style="height: 608px; overflow-y: auto;">
+                   <canvas id="chartProvincie"></canvas>
+                </div>
+
+                 <h4 style="margin-top:18px;">Acquisti per categoria</h4>
+                 <div class="chart-wrap sm">
+                     <canvas id="chartCatVendite"></canvas>
+                 </div>
+
+                 <h4 style="margin-top:18px;">Fatturato per mese</h4>
+                <div class="chart-wrap sm">
+                  <canvas id="chartFatturatoMese"></canvas>
+                </div>
+
+                <h4 style="margin-top:18px;">Fatturato per punto vendita</h4>
+                <div class="chart-wrap" style="height: 608px; overflow-y: auto;">
+                  <canvas id="chartFatturatoPDV"></canvas>
+                </div>
+
+            </div>
+      </aside>
+    </div>
+  </div>
+
 
 
      <script src="script.js"></script>
