@@ -8,7 +8,7 @@ DROP TABLE IF EXISTS Prodotto;
 DROP TABLE IF EXISTS Categoria;
 DROP TABLE IF EXISTS Provincia;
 
-USE Z_GLAM;
+USE Z_glam;
 
 --TABELLE:
 CREATE TABLE Provincia ( 
