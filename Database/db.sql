@@ -483,7 +483,7 @@ INSERT INTO Prodotto (NomeProdotto, Marchio, PrezzoBase, IDCategoria) VALUES --6
 INSERT INTO PuntoVendita (IDProvincia, Indirizzo) VALUES --10 tuple
     (58, 'Via Torino, 1, 20123'),
     (58, 'Corso Buenos Aires, 2, 20124'),
-    (50, 'Corso Roma, 60, 26900'),
+    (50, 'Corso Veneto, 60, 26900'),
     (50, 'Corso Roma, 52, 26900'),
     (66, 'Via Umberto I, 84, 35127'),
     (104, 'Campo della Fava, 5527, 30100'),
