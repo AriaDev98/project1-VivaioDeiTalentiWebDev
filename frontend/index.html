@@ -3,13 +3,13 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Dashboard Z-Glam</title>
+    <title>Z-Glam Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>   <!-- serve per creare grafici interattivi in una pagina web -->
 
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<h1>Dashboard Z-Glam</h1>
+<h1>Z-Glam Dashboard </h1>
 
 <div class="page">
     <div class="layout">
@@ -17,12 +17,7 @@
       <div class="left">
         <h2>Riepilogo vendite e sconti</h2>
         <!--Tessere fedeltà totali   TODO: DA CAMBIARE LA SUA POSIZIONE SULLA PAGINA --> 
-        <div class="kpis">
-        <div class="kpi">
-            <div class="kpi-label">Tessere fedeltà totali</div>
-            <div id="kpiTessere" class="kpi-value">0</div>
-        </div>
-        </div>
+
         <p id="status" class="muted" hidden></p>
 
         <!-- Per categoria -->
@@ -35,7 +30,7 @@
                 <th class="num">NumeroProdottiVenduti</th>
                 <th class="num">QuantitaScontiApplicati</th>
               </tr>
-            </thead>
+            </thead>  
             <tbody id="tb-cat"></tbody>
           </table>
         </section>
@@ -111,6 +106,16 @@
                 <div class="chart-wrap" style="height: 608px; overflow-y: auto;">
                   <canvas id="chartFatturatoPDV"></canvas>
                 </div>
+
+                <br>
+                <br>
+                <br>
+                <div class="kpis">
+                    <div class="kpi">
+                      <div class="kpi-label">Tessere fedeltà totali</div>
+                      <div id="kpiTessere" class="kpi-value">0</div>
+                    </div>
+                  </div>
 
             </div>
       </aside>
