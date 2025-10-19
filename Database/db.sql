@@ -18,7 +18,8 @@ USE Z_glam;
 CREATE TABLE Provincia ( 
     IDProvincia INT IDENTITY(1,1) PRIMARY KEY, 
 
-    NomeProvincia VARCHAR(50) NOT NULL,
+    NomeProvincia VARCHAR(50) NOT NULL, --non utilizzata come primary key perchè se il db verrà espanso all'estero allora potrebbe contenere duplicati
+                                        --(ci sono province omonime nel mondo)
 
     Regione VARCHAR(50) NOT NULL
 );
@@ -30,6 +31,8 @@ CREATE TABLE Categoria (
 
     Sesso VARCHAR(6) NOT NULL,
         CHECK (Sesso IN ('uomo', 'donna', 'unisex')),
+
+    CONSTRAINT NoDuplicatiCategoriaESesso UNIQUE (NomeCategoria, Sesso), --vieto che possano esistere due categorie con stesso nome e sesso
 
     CategoriaMerceologica VARCHAR(50) NOT NULL
 );
@@ -60,8 +63,8 @@ CREATE TABLE PuntoVendita (
 );
 
 CREATE TABLE ClienteRegistrato (
-   
-    --esclusi dai clienti registrati tutti i clienti tranne quelli che hanno fatto solo acquisti in retail senza mai presentare la tessera 
+    --ClienteRegistrato: clienti che hanno fatto la registrazione online sul sito o clienti che hanno fatto la tessera in retail
+    --esclusi dai clienti registrati quelli che hanno fatto solo acquisti in retail senza mai presentare la tessera 
 
     --i clienti registrati possono non aver mai fatto acquisti! (caso cliente registrato online che non ha fatto acquisti)
     
@@ -76,9 +79,8 @@ CREATE TABLE ClienteRegistrato (
     NumeroDiTelefono VARCHAR(30) NOT NULL,
 
     TesseraFedelta BIT NOT NULL, 
-    --se è 0 allora il cliente registrato in questione ha fatto solo (0 o più) ordini online, non può aver fatto acquisti in retail
-    --se è 1 allora il cliente registrato in questione ha fatto (0 o più) ordini online e/o (0 o più) acquisti in retail
-    
+    --se è 0 allora il cliente registrato in questione si è per forza registrato online
+
     IDProvincia INT NOT NULL,
 
     FOREIGN KEY (IDProvincia) REFERENCES Provincia(IDProvincia)
@@ -93,10 +95,14 @@ CREATE TABLE Scontrino (
     CodiceSconto BIT NOT NULL,
 
     IDClienteRegistrato INT,
-    --IDClienteRegistrato IS NULL => all'acquisto il cliente non ha presentato TesseraFedeltà (perchè non la ha o perchè l'ha dimenticata a casa) 
-        --(se ce l'ha ma l'ha dimenticata a casa non è possibile in alcun modo utilizzarla per politiche aziendali (facendo così l'azienda guadagna di più))
-        --(se il cliente perde la tessera o gli viene rubata è fregato? deve rifarla? DIREI DI SI (motivo politiche aziendali...)! fare la tessera costa? e se si quanto? direi 25 euro)
-    --IDClienteRegistrato NOT NULL => all'acquisto ha presentato la TesseraFedelta (verificato dall'ultimo trigger)
+    --IDClienteRegistrato IS NULL => il cliente non ha la tessera fedeltà
+    --IDClienteRegistrato NOT NULL => il cliente ha la tessera fedeltà (verificato da trigger relativo)
+
+    --se il cliente si dimentica a casa la tessera può utilizzarla lo stesso verificando via carta di identità (nome e cognome) che sia lui
+    --il possessore e facendosi mandare una mail per confermarne l'utilizzo nell'acquisto
+
+    --se il cliente perde la tessera o gli viene rubata può rifarla gratis verificando che sia lui il possessore tramite carta di identità e facendosi 
+    --mandare la mail per rifarla
     
     IDPuntoVendita INT NOT NULL,
 
@@ -112,7 +118,7 @@ CREATE TABLE Ordine (
 
     CodiceSconto BIT NOT NULL,
 
-    IDClienteRegistrato INT NOT NULL,
+    IDClienteRegistrato INT NOT NULL, --per gli odini online IDClienteRegistrato non pùò essere NULL, il cliente è per forza registrato nel sito
     
     FOREIGN KEY (IDClienteRegistrato) REFERENCES ClienteRegistrato(IDClienteRegistrato)
 );
@@ -127,9 +133,9 @@ CREATE TABLE VenditaProdottoRetail (
     Quantita INT NOT NULL,
         CHECK (Quantita > 0),
    
-    PrezzoUnitarioScontato DECIMAL(10,2),
+    PrezzoUnitarioScontato DECIMAL(10,2), --calcolato tramite trigger
     
-    Sconto INT,
+    Sconto INT, --calcolato tramite trigger
 
     FOREIGN KEY (IDScontrino) REFERENCES Scontrino(IDScontrino),
     FOREIGN KEY (IDProdotto) REFERENCES Prodotto(IDProdotto)
@@ -159,12 +165,11 @@ CREATE TABLE VenditaProdottoOnline (
 --TRIGGERS:
 GO
 
-CREATE OR ALTER TRIGGER trg_CalcolaScontoEPrezzo_VenditaProdottoRetail
+CREATE OR ALTER TRIGGER trg_CalcolaScontoEPrezzo_VenditaProdottoRetail --calcolo sconto e prezzo unitario scontato nelle vendite retail
 ON VenditaProdottoRetail
 AFTER INSERT, UPDATE
 AS
-BEGIN
-    SET NOCOUNT ON;
+BEGIN 
 
     UPDATE vpr
     SET vpr.Sconto =
@@ -186,30 +191,29 @@ BEGIN
         END
     FROM VenditaProdottoRetail vpr
         INNER JOIN inserted i 
-            ON vpr.IDScontrino = i.IDScontrino AND vpr.IDProdotto = i.IDProdotto
+        ON vpr.IDScontrino = i.IDScontrino AND vpr.IDProdotto = i.IDProdotto
         INNER JOIN Scontrino s
-            ON i.IDScontrino = s.IDScontrino
+        ON i.IDScontrino = s.IDScontrino
         INNER JOIN Prodotto p
-            ON i.IDProdotto = p.IDProdotto;
+        ON i.IDProdotto = p.IDProdotto;
 
     UPDATE vpr
     SET vpr.PrezzoUnitarioScontato = 
         ROUND(p.PrezzoBase - ((p.PrezzoBase * ISNULL(vpr.Sconto, 0)) / 100.0), 2)
     FROM VenditaProdottoRetail vpr
         INNER JOIN inserted i 
-            ON vpr.IDScontrino = i.IDScontrino AND vpr.IDProdotto = i.IDProdotto
+        ON vpr.IDScontrino = i.IDScontrino AND vpr.IDProdotto = i.IDProdotto
         INNER JOIN Prodotto p
-            ON vpr.IDProdotto = p.IDProdotto;
+        ON vpr.IDProdotto = p.IDProdotto;
 END;
 
 GO
 
-CREATE OR ALTER TRIGGER trg_CalcolaScontoEPrezzo_VenditaProdottoOnline
+CREATE OR ALTER TRIGGER trg_CalcolaScontoEPrezzo_VenditaProdottoOnline --calcolo sconto e prezzo unitario scontato nelle vendite online
 ON VenditaProdottoOnline
 AFTER INSERT, UPDATE
 AS
 BEGIN
-    SET NOCOUNT ON;
 
     UPDATE vpo
     SET vpo.Sconto =
@@ -226,47 +230,46 @@ BEGIN
                  AND (c.TesseraFedelta = 0 OR p.PrezzoBase < 50) THEN NULL
         END
     FROM VenditaProdottoOnline vpo
-    INNER JOIN inserted i 
+        INNER JOIN inserted i 
         ON vpo.IDOrdine = i.IDOrdine AND vpo.IDProdotto = i.IDProdotto
-    INNER JOIN Ordine o 
+        INNER JOIN Ordine o 
         ON i.IDOrdine = o.IDOrdine
-    INNER JOIN ClienteRegistrato c 
+        INNER JOIN ClienteRegistrato c 
         ON o.IDClienteRegistrato = c.IDClienteRegistrato
-    INNER JOIN Prodotto p 
+        INNER JOIN Prodotto p 
         ON i.IDProdotto = p.IDProdotto;
 
     UPDATE vpo
     SET vpo.PrezzoUnitarioScontato = 
         ROUND(p.PrezzoBase - ((p.PrezzoBase * ISNULL(vpo.Sconto, 0)) / 100.0), 2)
     FROM VenditaProdottoOnline vpo
-    INNER JOIN inserted i 
+        INNER JOIN inserted i 
         ON vpo.IDOrdine = i.IDOrdine AND vpo.IDProdotto = i.IDProdotto
-    INNER JOIN Prodotto p 
+        INNER JOIN Prodotto p 
         ON vpo.IDProdotto = p.IDProdotto;
 END;
 
 GO
 
-CREATE TRIGGER trg_VerificaTesseraFedelta_Scontrino
+CREATE TRIGGER trg_VerificaTesseraFedelta_Scontrino --verifico che se nello scontrino IDClienteRegistrato è NOT NULL allora tale Cliente ha la tessera
 ON Scontrino
 AFTER INSERT, UPDATE
 AS
 BEGIN
-    SET NOCOUNT ON;
 
     IF EXISTS (
         SELECT *
         FROM inserted i
-        JOIN ClienteRegistrato c ON i.IDClienteRegistrato = c.IDClienteRegistrato
+            JOIN ClienteRegistrato c ON i.IDClienteRegistrato = c.IDClienteRegistrato
         WHERE i.IDClienteRegistrato IS NOT NULL
-          AND c.TesseraFedelta = 0
+            AND c.TesseraFedelta = 0
     )
     BEGIN
         RAISERROR (
             'ERRORE: Ogni cliente associato allo scontrino deve avere TesseraFedelta = 1.',
-            16, 1 --severità e stato dell'errore
+            16, 1 --gravità, stato
         );
-        ROLLBACK TRANSACTION;
+        ROLLBACK TRANSACTION; --annullamento dell'insert/update causa del problema
         RETURN;
     END
 END;
@@ -1242,7 +1245,7 @@ SELECT * FROM VenditaProdottoOnline;
 
 
 
---QUERY DI CONTROLLO (TABELLA UNICA COMPLETA, ogni tupla la vendita online o retail di un prodotto in certa una quantità): 
+--QUERY DI CONTROLLO (TABELLA UNICA COMPLETA, ogni tupla è la vendita online o retail di un prodotto in una certa quantità): 
 WITH
     VenditaProdotto AS (SELECT IDScontrino, NULL AS IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoRetail UNION ALL 
             SELECT NULL AS IDScontrino, IDOrdine, IDProdotto, Quantita, PrezzoUnitarioScontato, Sconto FROM VenditaProdottoOnline),
