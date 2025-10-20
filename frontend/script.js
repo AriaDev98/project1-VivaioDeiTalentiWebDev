@@ -232,7 +232,7 @@
                     }]
                 },
                 options: {
-                    cutout: '65%',
+                    cutout: '40%',
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
