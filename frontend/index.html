@@ -13,12 +13,11 @@
         <div class="page">
             <div class="layout">
                 <div class="left">
-                    <h2>Riepilogo vendite e sconti</h2>
                     
                     <p id="status" class="muted" hidden></p>
 
                     <section class="table-group">
-                        <h3>Per categoria merceologica</h3>
+                        <h3>Vendite e sconti per categoria merceologica</h3>
                         <table class="grid">
                             <thead>
                                 <tr>
@@ -32,7 +31,7 @@
                     </section>
 
                     <section class="table-group">
-                        <h3>Per prodotto</h3>
+                        <h3>Vendite e sconti per prodotto</h3>
                         <table class="grid">
                             <thead>
                                 <tr>
@@ -46,7 +45,7 @@
                     </section>
 
                     <section class="table-group">
-                        <h3>Per regione (solo retail)</h3>
+                        <h3>Vendite e sconti per regione (solo vendite retail)</h3>
                         <table class="grid">
                             <thead>
                                 <tr>
@@ -60,7 +59,7 @@
                     </section>
 
                     <section class="table-group">
-                        <h3>Per provincia (solo retail)</h3>
+                        <h3>Vendite e sconti per provincia (solo vendite retail)</h3>
                         <table class="grid">
                             <thead>
                                 <tr>
@@ -78,35 +77,29 @@
                 <aside class="right">
                     <div class="card viz">
 
-                        <h3>Visualizzazioni</h3>
-                        <h4 style="margin-top:8px;">Prodotti venduti per provincia</h4>
+                        <h4 style="margin-top:8px;">Numero vendite per provincia</h4>
                         <div class="chart-wrap" style="height: 608px; overflow-y: auto;">
                             <canvas id="chartProvincie"></canvas>
                         </div>
-
-                        <h4 style="margin-top:18px;">Acquisti per categoria</h4>
+                        
+                        <h4 style="margin-top:100px;">Numero vendite per categoria</h4>
                         <div class="chart-wrap sm">
                             <canvas id="chartCatVendite"></canvas>
                         </div>
-
-                        <h4 style="margin-top:18px;">Fatturato per mese</h4>
+                        
+                        <h4 style="margin-top:100px;">Fatturato per mese</h4>
                         <div class="chart-wrap sm">
                             <canvas id="chartFatturatoMese"></canvas>
                         </div>
-
-                        <h4 style="margin-top:18px;">Fatturato per punto vendita</h4>
+                        
+                        <h4 style="margin-top:100px;">Fatturato per punto vendita</h4>
                         <div class="chart-wrap" style="height: 608px; overflow-y: auto;">
                             <canvas id="chartFatturatoPDV"></canvas>
                         </div>
-
-                        <br>
-                        <br>
-                        <br>
-                        <div class="kpis">
-                            <div class="kpi">
-                                <div class="kpi-label">Tessere fedeltà totali</div>
-                                <div id="kpiTessere" class="kpi-value">0</div>
-                            </div>
+                        
+                        <div class="kpis" style="margin-top:100px;">
+                            <h4>Numero tessere fedeltà:</h4>
+                            <div id="kpiTessere" class="kpi-value" style="margin-bottom:3px;">0</div>
                         </div>
 
                     </div>
