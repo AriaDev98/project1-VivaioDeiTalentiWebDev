@@ -64,7 +64,7 @@ CREATE TABLE PuntoVendita (
 
 CREATE TABLE ClienteRegistrato (
     --ClienteRegistrato: clienti che hanno fatto la registrazione online sul sito o clienti che hanno fatto la tessera in retail
-    --esclusi dai clienti registrati quelli che hanno fatto solo acquisti in retail senza mai presentare la tessera 
+    --esclusi dai clienti registrati quelli che hanno fatto solo acquisti in retail e che non hanno la tessera
 
     --i clienti registrati possono non aver mai fatto acquisti! (caso cliente registrato online che non ha fatto acquisti)
     
@@ -118,7 +118,7 @@ CREATE TABLE Ordine (
 
     CodiceSconto BIT NOT NULL,
 
-    IDClienteRegistrato INT NOT NULL, --per gli odini online IDClienteRegistrato non pùò essere NULL, il cliente è per forza registrato nel sito
+    IDClienteRegistrato INT NOT NULL, --per gli ordini online IDClienteRegistrato non pùò essere NULL, il cliente è per forza registrato nel sito
     
     FOREIGN KEY (IDClienteRegistrato) REFERENCES ClienteRegistrato(IDClienteRegistrato)
 );
@@ -151,9 +151,9 @@ CREATE TABLE VenditaProdottoOnline (
     Quantita INT NOT NULL,
         CHECK (Quantita > 0),
    
-    PrezzoUnitarioScontato DECIMAL(10,2),
+    PrezzoUnitarioScontato DECIMAL(10,2), --calcolato tramite trigger
     
-    Sconto INT, 
+    Sconto INT, --calcolato tramite trigger
 
     FOREIGN KEY (IDOrdine) REFERENCES Ordine(IDOrdine),
     FOREIGN KEY (IDProdotto) REFERENCES Prodotto(IDProdotto)
