@@ -271,14 +271,14 @@
     }
 
     function monthIndex(name) {
-        const IT = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
-        const EN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        name = name.trim().toLowerCase();
+        const IT = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+        const EN = ['january','february','march','april','may','june','july','august','september','october','november','december'];
+
         var i = IT.indexOf(name);
-        if (i >= 0) 
-            return i;
+        if (i >= 0) return i;
         i = EN.indexOf(name);
-        if (i >= 0) 
-            return i;
+        if (i >= 0) return i;
         return 99;
     }
 
@@ -300,7 +300,7 @@
                 return;
 
             righe.sort(function(a, b) {
-                return monthIndex(a.MeseDel2025) - monthIndex(b.MeseDel2025);
+                return monthIndex(a.MeseDel2025.trim()) - monthIndex(b.MeseDel2025.trim());
             });
 
             var labels = [];

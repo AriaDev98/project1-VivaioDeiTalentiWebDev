@@ -24,6 +24,8 @@ CREATE DATABASE Z_glam;
 
 USE Z_glam;
 
+SET LANGUAGE English;
+
 --TABELLE:
 CREATE TABLE Provincia ( 
     IDProvincia INT IDENTITY(1,1) PRIMARY KEY, 
@@ -1436,7 +1438,6 @@ WITH
 SELECT tmp1.MeseDel2025, SUM(tmp1.Fatturato) AS Fatturato
 FROM tmp1
 GROUP BY tmp1.MeseDel2025;
---ORDER BY tmp1.MeseDel2025 ASC;
 
 go
 

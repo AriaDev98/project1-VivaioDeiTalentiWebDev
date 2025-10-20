@@ -149,7 +149,6 @@ app.get('/charts/fatturato-mese', async (req, res) => {
         const { recordset } = await pool.request().query(`
             SELECT MeseDel2025, Fatturato
             FROM QueryFatturatoMese
-            Order by MeseDel2025 asc;
         `);
         res.json(recordset);
     } catch (err) {
