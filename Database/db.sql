@@ -8,6 +8,16 @@ DROP TABLE IF EXISTS Prodotto;
 DROP TABLE IF EXISTS Categoria;
 DROP TABLE IF EXISTS Provincia;
 
+DROP VIEW IF EXISTS QueryFatturatoMese
+DROP VIEW IF EXISTS QueryFatturatoPuntoVendita
+DROP VIEW IF EXISTS QueryNumeroTessereFedelta
+DROP VIEW IF EXISTS QueryNumeroVenditeCategoriaMerceologica
+DROP VIEW IF EXISTS QueryProdottiVendutiPerProvincia
+DROP VIEW IF EXISTS QueryVenditeEScontiPerCategoriaMerceologica
+DROP VIEW IF EXISTS QueryVenditeEScontiPerProdotto
+DROP VIEW IF EXISTS QueryVenditeEScontiRetailPerProvincia
+DROP VIEW IF EXISTS QueryVenditeEScontiRetailPerRegione
+
 USE master;
 DROP DATABASE IF EXISTS Z_glam;
 CREATE DATABASE Z_glam; 

@@ -92,7 +92,7 @@ app.get('/sales/by-provincia-retail', async (req, res) => {
 });
 
 //ENDPOINT: numero di tessere fedeltà
-app.get('/loyalty/count', async (req, res) => {
+app.get('/tesserefedelta/numero', async (req, res) => {
     try {
         const pool = await sql.connect(config);
         const { recordset } = await pool.request().query(`
@@ -101,8 +101,8 @@ app.get('/loyalty/count', async (req, res) => {
         `);
         res.json({ TotaleTessere: recordset[0]?.TotaleTessere ?? 0 });
     } catch (err) {
-        console.error('Errore richiesta GET al DB (ENDPOINT: /loyalty/count):', explain(err));
-        res.status(500).send('Errore richiesta al DB o errore nella query (ENDPOINT: /loyalty/count)');
+        console.error('Errore richiesta GET al DB (ENDPOINT: /tesserefedelta/numero):', explain(err));
+        res.status(500).send('Errore richiesta al DB o errore nella query (ENDPOINT: /tesserefedelta/numero)');
     }
 })
 
@@ -149,7 +149,7 @@ app.get('/charts/fatturato-mese', async (req, res) => {
         const { recordset } = await pool.request().query(`
             SELECT MeseDel2025, Fatturato
             FROM QueryFatturatoMese
-            Order by MeseDel2025 desc;
+            Order by MeseDel2025 asc;
         `);
         res.json(recordset);
     } catch (err) {
@@ -189,7 +189,7 @@ app.listen(3000, () => {
     console.log('Vendite e sconti per prodotto: http://localhost:3000/sales/by-prodotto');
     console.log('Vendite e sconti per regione (retail): http://localhost:3000/sales/by-regione-retail');
     console.log('Vendite e sconti per provincia (retail): http://localhost:3000/sales/by-provincia-retail');
-    console.log('Tessere fedeltà: http://localhost:3000/loyalty/count');
+    console.log('Tessere fedeltà: http://localhost:3000/tesserefedelta/numero');
     console.log('Grafico vendite per provincia: http://localhost:3000/charts/prodotti-per-provincia');
     console.log('Vendite per categoria merceologica: http://localhost:3000/charts/vendite-per-categoria');
     console.log('Fatturato per mese: http://localhost:3000/charts/fatturato-mese');
